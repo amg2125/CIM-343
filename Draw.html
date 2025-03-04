@@ -1,0 +1,42 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubbles</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        background("DeepPink");
+
+        fill("Indigo");
+        stroke("DeepPink");
+      }
+
+      //When cursor leaves screen
+      //Set leftScreen = true
+
+      function draw() {
+        //if leftScreen
+        //leftScreen = false
+        //return
+        let distance = dist(pmouseX, pmouseY, mouseX, mouseY);
+        let size = distance * 2;
+
+        if (size < 6) {
+          size = 6;
+        }
+
+        circle(mouseX, mouseY, size);
+      }
+    </script>
+  
+
+<main><canvas id="defaultCanvas0" class="p5Canvas" width="3414" height="1864" style="width: 1707px; height: 932px;"></canvas></main></body></html>
