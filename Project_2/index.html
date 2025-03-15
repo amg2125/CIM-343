@@ -9,11 +9,41 @@
         body {
             margin: 0;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #score {
+            position: absolute;
+            top: 20px;
+            font-size: 24px;
+        }
+        button {
+            position: absolute;
+            bottom: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            background: white;
+            color: black;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
+    <div id="score">Score: --</div>
+    <button onclick="resetCanvas()">Try Again</button>
+
     <script>
+        let drawing = [];
+        let isDrawing = false;
+        let startX, startY;
+        let circleX, circleY, circleRadius = 20; // Reference circle properties
+
     function setup() {
         // Create the canvas
         createCanvas(windowWidth, windowHeight);
@@ -26,26 +56,80 @@
       
         // Set color mode to hue-saturation-brightness (HSB)
         colorMode(HSB);
+
+        textAlign(CENTER, CENTER);
       
-        // Set screen reader accessible description
-        describe('A blank canvas where the user draws by dragging the mouse');
+        // Set reference circle position
+        circleX = width / 2;
+        circleY = height / 2;
 
-        x = width / 2;
-        y = height / 2;
+        resetCanvas(); // Ensure the circle is drawn at the start
+    }
 
-        circle(x, y, 50);
+    function drawReferenceCircle() {
+        fill(255);
+        stroke(0); // White reference circle
+        strokeWeight(2);
+        ellipse(circleX, circleY, circleRadius * 2);
+    }
 
-      }
-      
-      function mouseDragged() {
-        // Set the color based on the mouse position, and draw a line
-        // from the previous position to the current position
-        let lineHue = mouseX - mouseY;
-        stroke(lineHue, 90, 90);
-        line(pmouseX, pmouseY, mouseX, mouseY);
-      }
+      function mousePressed() {
+        drawing = []; // Clear previous attempt
+        isDrawing = true;
+        startX = mouseX;
+        startY = mouseY;
+    }
 
+    function mouseDragged() {
+        if (isDrawing) {
+            stroke(mouseX - mouseY, 90, 90);
+            line(pmouseX, pmouseY, mouseX, mouseY);
+            drawing.push({ x: mouseX, y: mouseY });
+        }
+    }
 
+    function mouseReleased() {
+        isDrawing = false;
+        calculateScore();
+    }
+
+    function calculateScore() {
+        if (drawing.length < 10) return; // Prevent scoring empty attempts
+
+        // Calculate bounding box center
+        let sumX = 0, sumY = 0;
+        drawing.forEach(pt => {
+            sumX += pt.x;
+            sumY += pt.y;
+        });
+        let centerX = sumX / drawing.length;
+        let centerY = sumY / drawing.length;
+
+        // Compute average radius
+        let totalRadius = 0;
+        drawing.forEach(pt => {
+            totalRadius += dist(pt.x, pt.y, centerX, centerY);
+        });
+        let avgRadius = totalRadius / drawing.length;
+
+        // Calculate score (higher consistency = better score)
+        let variance = 0;
+        drawing.forEach(pt => {
+            let r = dist(pt.x, pt.y, centerX, centerY);
+            variance += abs(r - avgRadius);
+        });
+        variance /= drawing.length;
+
+        let score = max(100 - variance, 0).toFixed(2);
+        document.getElementById("score").innerText = `Score: ${score}`;
+    }
+
+    function resetCanvas() {
+        background(0);
+        drawReferenceCircle();
+        document.getElementById("score").innerText = "Score: --";
+        drawing = [];
+    }
       </script>
 
 
