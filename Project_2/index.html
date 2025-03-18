@@ -82,7 +82,12 @@
     }
 
     function mouseDragged() {
-        if (isDrawing) {
+        if (!isDrawing) return;
+
+        let distanceToCenter = dist(mouseX, mouseY, circleX, circleY);
+        let noDrawRadius = circleRadius + 10;
+
+        if (distanceToCenter > noDrawRadius) {
             stroke(mouseX - mouseY, 90, 90);
             line(pmouseX, pmouseY, mouseX, mouseY);
             drawing.push({ x: mouseX, y: mouseY });
