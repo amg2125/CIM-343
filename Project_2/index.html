@@ -41,6 +41,7 @@
     <script>
         let drawing = [];
         let isDrawing = false;
+        let canDraw = true;
         let startX, startY;
         let circleX, circleY, circleRadius = 20; // Reference circle properties
 
@@ -74,10 +75,10 @@
     }
 
       function mousePressed() {
-        drawing = []; // Clear previous attempt
+        if (!canDraw) return;
+
+        drawing = [];
         isDrawing = true;
-        startX = mouseX;
-        startY = mouseY;
     }
 
     function mouseDragged() {
@@ -89,8 +90,11 @@
     }
 
     function mouseReleased() {
-        isDrawing = false;
-        calculateScore();
+        if (isDrawing) {
+            isDrawing = false;
+            canDraw = false;
+            calculateScore();
+        }
     }
 
     function calculateScore() {
@@ -129,6 +133,7 @@
         drawReferenceCircle();
         document.getElementById("score").innerText = "Score: --";
         drawing = [];
+        canDraw = true;
     }
       </script>
 
