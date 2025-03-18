@@ -98,7 +98,19 @@
     }
 
     function calculateScore() {
-        if (drawing.length < 10) return; // Prevent scoring empty attempts
+        if (drawing.length < 10) {
+            document.getElementById("score").innerText = "Score: --";
+            return;
+        }
+
+        let start = drawing[0];
+        let end = drawing[drawing.length - 1];
+        let closureThreshold = 30;
+
+        if (dist(start.x, start.y, end.x, end.y) > closureThreshold) {
+            document.getElementById("score").innerText = "Score: --";
+            return;
+        }
 
         // Calculate bounding box center
         let sumX = 0, sumY = 0;
