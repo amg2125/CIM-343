@@ -67,6 +67,15 @@
         resetCanvas(); // Ensure the circle is drawn at the start
     }
 
+    function getPolarCoordinates(x, y) {
+    let dx = x - circleX; // Distance from center X
+    let dy = y - circleY; // Distance from center Y
+    let r = sqrt(dx * dx + dy * dy); // Radius (distance from center)
+    let theta = atan2(dy, dx); // Angle in radians
+
+    return { r, theta };
+    }
+
     function drawReferenceCircle() {
         fill(255);
         stroke(0); // White reference circle
@@ -81,6 +90,8 @@
         isDrawing = true;
     }
 
+    let polarPath = [];
+
     function mouseDragged() {
         if (!isDrawing) return;
 
@@ -91,6 +102,9 @@
             stroke(mouseX - mouseY, 90, 90);
             line(pmouseX, pmouseY, mouseX, mouseY);
             drawing.push({ x: mouseX, y: mouseY });
+
+            let polarPoint = getPolarCoordinates(mouseX, mouseY);
+            polarPath.push(polarPoint);
         }
     }
 
@@ -108,38 +122,17 @@
             return;
         }
 
-        let start = drawing[0];
-        let end = drawing[drawing.length - 1];
-        let closureThreshold = 30;
+        let minTheta = Math.min(...polarPath.map(p => p.theta));
+        let maxTheta = Math.max(...polarPath.map(p => p.theta));
 
-        if (dist(start.x, start.y, end.x, end.y) > closureThreshold) {
+        if (maxTheta - minTheta < Math.PI * 1.9) {
             document.getElementById("score").innerText = "Score: --";
             return;
         }
 
-        // Calculate bounding box center
-        let sumX = 0, sumY = 0;
-        drawing.forEach(pt => {
-            sumX += pt.x;
-            sumY += pt.y;
-        });
-        let centerX = sumX / drawing.length;
-        let centerY = sumY / drawing.length;
-
-        // Compute average radius
-        let totalRadius = 0;
-        drawing.forEach(pt => {
-            totalRadius += dist(pt.x, pt.y, centerX, centerY);
-        });
-        let avgRadius = totalRadius / drawing.length;
-
-        // Calculate score (higher consistency = better score)
-        let variance = 0;
-        drawing.forEach(pt => {
-            let r = dist(pt.x, pt.y, centerX, centerY);
-            variance += abs(r - avgRadius);
-        });
-        variance /= drawing.length;
+        
+        let avgRadius = polarPath.reduce((sum, p) => sum + p.r, 0) / polarPath.length;
+        let variance = polarPath.reduce((sum, p) => sum + abs(p.r - avgRadius), 0) / polarPath.length;
 
         let score = max(100 - variance, 0).toFixed(2);
         document.getElementById("score").innerText = `Score: ${score}`;
