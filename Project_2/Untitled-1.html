@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw a Circle</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #score {
+            position: absolute;
+            top: 20px;
+            font-size: 24px;
+        }
+        button {
+            position: absolute;
+            bottom: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            background: white;
+            color: black;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: --</div>
+    <button onclick="resetCanvas()">Try Again</button>
+
+    <script>
+        let drawing = [];
+        let isDrawing = false;
+        let canDraw = true;
+        let startX, startY;
+        let circleX, circleY, circleRadius = 20; // Reference circle properties
+        let lastAngle = null; // Stores the last recorded angle
+        let drawingStopped = false; // Flag to prevent further drawing
+
+    function setup() {
+        // Create the canvas
+        createCanvas(windowWidth, windowHeight);
+      
+        // Set background to black
+        background(0);
+      
+        // Set width of the lines
+        strokeWeight(10);
+      
+        // Set color mode to hue-saturation-brightness (HSB)
+        colorMode(HSB);
+
+        textAlign(CENTER, CENTER);
+      
+        // Set reference circle position
+        circleX = width / 2;
+        circleY = height / 2;
+
+        resetCanvas(); // Ensure the circle is drawn at the start
+    }
+
+    function getPolarCoordinates(x, y) {
+    let dx = x - circleX; // Distance from center X
+    let dy = y - circleY; // Distance from center Y
+    let r = sqrt(dx * dx + dy * dy); // Radius (distance from center)
+    let theta = atan2(dy, dx); // Angle in radians
+
+    return { r, theta };
+    }
+
+    function drawReferenceCircle() {
+        fill(255);
+        stroke(0); // White reference circle
+        strokeWeight(2);
+        ellipse(circleX, circleY, circleRadius * 2);
+    }
+
+      function mousePressed() {
+        if (!canDraw) return;
+
+        drawing = [];
+        isDrawing = true;
+    }
+
+    
+    let polarPath = [];
+
+    function mouseDragged() {
+        if (!isDrawing || drawingStopped) return;
+
+        let distanceToCenter = dist(mouseX, mouseY, circleX, circleY);
+        let noDrawRadius = circleRadius + 10;
+
+        if (distanceToCenter > noDrawRadius) {
+            let polarPoint = getPolarCoordinates(mouseX, mouseY);
+            
+            if (lastAngle !== null) {
+                let angleDifference = polarPoint.theta - lastAngle;
+
+                // Normalize the angle difference to be between -PI and PI
+                if (angleDifference > Math.PI) angleDifference -= 2 * Math.PI;
+                if (angleDifference < -Math.PI) angleDifference += 2 * Math.PI;
+
+                // Check if the user is drawing in the wrong direction
+                if (angleDifference < 0) {
+                    mouseReleased(); // Assume mouseReleased if drawing in the wrong direction
+                    return;
+                }
+            }
+
+            lastAngle = polarPoint.theta; // Update last recorded angle
+        
+            stroke(mouseX - mouseY, 90, 90);
+            line(pmouseX, pmouseY, mouseX, mouseY);
+            drawing.push({ x: mouseX, y: mouseY });
+            polarPath.push(polarPoint);
+        }
+    }
+
+    function mouseReleased() {
+        if (isDrawing) {
+            isDrawing = false;
+            canDraw = false;
+            calculateScore();
+        }
+    }
+
+    function calculateScore() {
+        if (drawing.length < 10) {
+            document.getElementById("score").innerText = "Score: --";
+            return;
+        }
+
+        let minTheta = Math.min(...polarPath.map(p => p.theta));
+        let maxTheta = Math.max(...polarPath.map(p => p.theta));
+
+        if (maxTheta - minTheta < Math.PI * 1.9) {
+            document.getElementById("score").innerText = "Score: --";
+            return;
+        }
+
+        
+        let avgRadius = polarPath.reduce((sum, p) => sum + p.r, 0) / polarPath.length;
+        let variance = polarPath.reduce((sum, p) => sum + abs(p.r - avgRadius), 0) / polarPath.length;
+
+        let score = max(100 - variance, 0).toFixed(2);
+        document.getElementById("score").innerText = `Score: ${score}`;
+    }
+
+    function resetCanvas() {
+        background(0);
+        drawReferenceCircle();
+        document.getElementById("score").innerText = "Score: --";
+        
+        drawing = [];
+        polarPath = [];
+        lastAngle = null;
+        drawingStopped = false;
+        canDraw = true;
+    }
+      </script>
+
+
+</body>
+</html>
