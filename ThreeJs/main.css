@@ -1,0 +1,8 @@
+#dummy {
+    background: red;
+    height: 200vh;
+}
+canvas {
+    position: fixed;
+    inset: 0;
+}
