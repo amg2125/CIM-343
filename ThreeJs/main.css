@@ -6,3 +6,16 @@ canvas {
     position: fixed;
     inset: 0;
 }
+#dummy-content {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for centering */
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    color: #000; /* Black text color */
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 10; /* Ensure it appears in front of the spinning shape */
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow for better visibility */
+}
